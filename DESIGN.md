@@ -1,318 +1,331 @@
 # 타로카드 — Design Guide
-> 한밤의 점집 — 조용한 남색 밤하늘 위에 금빛 한 점
+> 한밤의 점집 — 어두운 남색 바탕 위에 연두 한 점
 
 **Theme:** dark only (라이트 모드 없음)
 **Platform:** 모바일 웹 우선 (기준 폭 375px, 최대 폭 480px)
-**참고:** Linear 디자인 가이드를 타로 서비스에 맞게 바꾼 문서. 기획 문서 `TARO_01~04`와 Tailwind v4 · shadcn 규칙을 따른다.
+**기준 자료:** 기획 문서 `TARO_01~04` + 선배가 준 「명지대학교 타로 디자인 팩」(이하 **디자인 팩**) + Tailwind v4 · shadcn 규칙
 
-타로 서비스의 디자인은 **카드 한 장이 주인공**이 되도록 나머지를 조용하게 둔다. 바탕은 푸른빛이 도는 거의 검은 남색(#0a0a14)이고, 글자는 흰색 계열이며, 금빛(#f0c76a) 하나만 "지금 누를 것"을 알린다. 장식은 최소로 하고, 카드 그림과 해석 문장이 화면의 유일한 볼거리가 된다. 입력 화면은 가볍고 안심되게, 결과 화면은 한 장의 이미지처럼 완결되게 만든다.
+## 0. 이 문서가 디자인 팩과 맞춘 것 · 다르게 한 것
 
-Linear에서 가져온 것: 어두운 면 위계, 헤어라인 테두리, 한 화면 한 개의 강조색, 작은 반경 어휘.
-타로에서 바꾼 것: 강조색(산성 라임 → 달빛 금색), 서체(Inter → 한글 서체 Pretendard), 모바일 터치 크기, 카드 뒤집기 모션, 개인정보 안내 컴포넌트.
+디자인 팩은 **라이트 테마**(연회색 바탕 + 흰 카드 + 연두 강조) 한 벌이다. 이 프로젝트는 **다크로 통일**하기로 했으므로, 팩에서 **구조는 그대로** 가져오고 **색 값만 다크용으로 바꿨다.**
+
+| 구분 | 내용 |
+|---|---|
+| 팩 그대로 | 색 **역할 이름**(14개 토큰), 서체(Noto Sans KR), 글자 스타일 8개(크기 · 줄 높이 · 자간 -2%), 컴포넌트 구성 · 크기 · 모서리 반경, 아이콘 7개, 카드 그림(Rider-Waite-Smith 1909), 카드 뽑기 모션, 저장 · 공유 안내 흐름 |
+| 다크용으로 바꿈 | 색 **값**. 바탕 · 면 · 글자 · 테두리를 어두운 남색 계열로 새로 정했다. **팩에 없는 값이므로 이 문서가 기준**이다 (2장) |
+| 팩 + 결정 | 강조색은 팩의 연두 `#00D959`를 그대로 쓴다. 기존 금색은 폐기. Primary 버튼 글자는 다크 통일에 맞춰 **어두운 글자**(`on-accent`)로 한다 (흰 글자는 대비 1.9:1이라 쓰지 않는다) |
+| 팩에서 달라진 점 | 주제 칩은 **글자만**(이모지 없음). 카드 이름은 명조가 아니라 Headline(Noto Sans KR Bold). 금빛 후광 · 명조 서체 폐기 |
+
+> 팩의 `TARO_04 와이어프레임`은 이모지 칩(💼 💰 …)이 들어 있다. 이 문서는 팩을 따라 칩에서 이모지를 뺐으므로, 와이어프레임 문서와 달라진다. 와이어프레임 갱신 여부는 별도로 정한다.
 
 ---
 
 ## 1. 원칙
 
-1. **카드가 주인공**: 결과 화면에서 카드 그림이 가장 크고 밝다. 다른 요소는 카드보다 눈에 띄지 않는다.
-2. **금색은 한 화면에 한 번**: 금색 채움은 그 화면의 핵심 버튼 하나(시작 · 카드 뽑기)에만. 장식 · 보조 버튼 · 링크에 쓰지 않는다.
-3. **안심이 먼저**: 개인정보 안내(🔒)는 입력칸 바로 아래와 결과 화면에 항상 보이고, 읽기 쉬운 대비를 지킨다. 작아도 흐리게 만들지 않는다.
-4. **짧고 또렷하게**: 해석은 3줄. 줄 사이를 넉넉히 띄우고 한 줄에 한 문장.
-5. **오락용임을 숨기지 않기**: "오락용 타로 해석입니다"는 결과 화면 · 저장 이미지 · 공유 글에 같은 문구로 들어간다.
-6. **엄지로 누른다**: 모든 누르는 요소는 높이 44px 이상. 중요한 버튼은 화면 아래쪽에 둔다.
+1. **카드가 주인공**: 결과 화면에서 카드 그림(Rider-Waite-Smith)이 가장 크고 눈에 띈다. 나머지는 조용하게.
+2. **연두는 "지금 누를 것"**: 강조색 채움은 그 화면의 핵심 버튼 하나(타로 시작 · 카드 한 장 뽑기, 결과 화면은 [결과 공유])에만. 선택 표시(칩 · 포커스)에는 테두리로 쓴다.
+3. **안심이 먼저**: 개인정보 안내(🔒)는 입력칸 바로 아래와 결과 화면에 항상 보이고, 읽을 수 있는 대비를 지킨다.
+4. **짧고 또렷하게**: 해석은 3줄 · 90자 이내. 가운데 정렬.
+5. **오락용임을 숨기지 않기**: "오락용 타로 해석입니다"는 결과 화면 · 저장 이미지 · 공유 글에 같은 문구로.
+6. **엄지로 누른다**: 누르는 요소는 높이 44px 이상. 중요한 버튼은 화면 아래.
 
 ---
 
 ## 2. 색 (Colors)
 
-### 팔레트
+토큰 이름은 디자인 팩과 같다. 값은 다크용이다. (Figma 변수 컬렉션 `Taro`, 모드 `Dark`)
 
-| 이름 | 값 | 토큰 | 용도 |
+| 토큰 | 다크 값 | 팩(라이트) 값 | 용도 |
 |---|---|---|---|
-| Void | `#0a0a14` | `--color-void` | 페이지 바탕 |
-| Carbon | `#12121f` | `--color-carbon` | 카드 · 입력창 바탕 |
-| Obsidian | `#1a1a2b` | `--color-obsidian` | 한 단계 올라온 면 (선택된 칩, 팝업) |
-| Graphite | `#2a2a40` | `--color-graphite` | 구분선 · 헤어라인 테두리 (장식용) |
-| Smoke | `#3d3d57` | `--color-smoke` | 입력창 · 칩 테두리 (눈에 보여야 하는 경계) |
-| Ash | `#8a8aa6` | `--color-ash` | 보조 글자 · 비활성 아이콘 |
-| Fog | `#a3a3bd` | `--color-fog` | 안내문 · 입력 라벨 |
-| Mist | `#d6d6e6` | `--color-mist` | 본문 글자 |
-| Paper | `#ffffff` | `--color-paper` | 제목 · 해석 문장 · 강조 글자 |
-| Moon Gold | `#f0c76a` | `--color-gold` | **핵심 버튼 · 선택 표시 · 포커스 링** (유일한 강조색) |
-| Iris | `#a99cff` | `--color-iris` | 별자리 · 카드 번호 등 작은 장식 글자 (버튼 금지) |
-| Coral | `#f27d7d` | `--color-coral` | 오류 메시지 (생년월일 오류 등) |
-| Mint | `#5ed08a` | `--color-mint` | 성공 안내 (저장 · 복사 완료) |
+| `color/bg` | `#0A0A14` | `#F3F3F5` | 화면 바탕 |
+| `color/surface` | `#12121F` | `#FFFFFF` | 카드 · 입력창 · 칩 바탕 |
+| `color/surface-sub` | `#1A1A2B` | `#F6F6F8` | 한 단계 올라온 면 (개인정보 안내, 눌렀을 때) |
+| `color/text/primary` | `#FFFFFF` | `#000000` | 제목 · 해석 · 입력 값 |
+| `color/text/secondary` | `#A3A3BD` | `#4D4D4E` | 설명 · 입력 라벨 · 칩 기본 글자 |
+| `color/text/tertiary` | `#8A8AA6` | `#979F9B` | 안내 · 오락용 문구 · 자리 표시 |
+| `color/text/on-accent` | `#0A0A14` | `#FFFFFF` | 강조색 · inverse 위의 글자 (**다크 통일에서 어두운 글자로 바꿈**) |
+| `color/border` | `#3D3D57` | `#DCDCDD` | 입력창 · 보조 버튼 · 칩 테두리 |
+| `color/accent` | `#00D959` | `#00D959` | Primary 버튼 · 선택 테두리 · 포커스 (**팩 그대로**) |
+| `color/accent-soft` | `#0D2B1C` | `#E6FAEF` | 선택된 칩 바탕 · 카드 뒷면 장식 |
+| `color/accent-strong` | `#00D959` | `#00D959` | 강조 글자 (선택된 칩 글자 · 카드 메타) |
+| `color/disabled` | `#2A2A40` | `#D7D7D7` | 비활성 버튼 바탕 |
+| `color/danger` | `#F27D7D` | `#E5484D` | 오류 테두리 · 오류 문구 |
+| `color/inverse` | `#F3F3F5` | `#232427` | 토스트 바탕 (**다크에서는 밝은 면**) |
+| `color/accent-illust` | `#00DE00` | `#00DE00` | 일러스트 · 스와이프 안내 글자 (**팩 그대로**) |
 
-### 대비 (WCAG 계산값)
+### 대비 (WCAG 계산값, 다크 값 기준)
 
 | 글자 | 바탕 | 대비 | 판정 |
 |---|---|---|---|
-| Paper | Void | 19.7 : 1 | 통과 |
-| Mist | Void / Carbon | 13.7 / 12.9 : 1 | 통과 |
-| Fog | Void / Carbon | 8.0 / 7.5 : 1 | 통과 |
-| Ash | Void / Carbon / Obsidian | 5.9 / 5.5 / 5.1 : 1 | 통과 (본문 4.5 이상) |
-| Void 글자 | Moon Gold 버튼 | 12.3 : 1 | 통과 |
-| Gold | Void | 12.3 : 1 | 통과 |
-| Coral · Mint · Iris | Void | 7.5 · 10.2 · 8.3 : 1 | 통과 |
+| text/primary | bg | 19.7 : 1 | 통과 |
+| text/secondary | bg / surface / surface-sub | 8.0 / 7.5 / 7.0 : 1 | 통과 |
+| text/tertiary | bg / surface / surface-sub | 5.9 / 5.5 / 5.1 : 1 | 통과 (4.5 이상) |
+| on-accent | accent | 10.4 : 1 | 통과 |
+| on-accent | inverse | 17.8 : 1 | 통과 |
+| accent / accent-strong | bg / surface | 10.4 / 9.8 : 1 | 통과 |
+| accent-strong | accent-soft | 8.0 : 1 | 통과 |
+| danger | bg / surface | 7.5 / 7.1 : 1 | 통과 |
+| text/tertiary | disabled | 4.2 : 1 | 비활성 요소라 예외 |
+| 흰 글자 | accent (팩 원래 조합) | 1.9 : 1 | **쓰지 않음** |
 
-- 테두리: Graphite는 Void 위에서 1.4:1로 거의 안 보이는 **장식용**이다. 입력창 · 칩처럼 "여기가 눌린다"는 경계는 Smoke(1.9:1)와 배경 차이를 함께 써서 알린다.
-- 오류 · 성공은 **색만으로 알리지 않는다.** 아이콘 또는 문구를 반드시 함께 둔다.
+- `color/border`는 bg 위에서 1.9:1이라 경계가 겨우 보인다. 입력창 · 칩은 **테두리 + 면 색 차이**를 함께 쓴다.
+- 오류 · 성공은 **색만으로 알리지 않는다.** 문구(+ 아이콘)를 같이 둔다.
 
 ### shadcn 변수 매핑
 
-shadcn 컴포넌트는 `bg-primary`처럼 의미 이름만 쓴다. 아래처럼 연결한다.
-
-| shadcn 변수 | 값 |
+| shadcn 변수 | 팩 토큰 |
 |---|---|
-| `--background` | Void |
-| `--foreground` | Paper |
-| `--card` / `--popover` | Carbon |
-| `--card-foreground` / `--popover-foreground` | Paper |
-| `--primary` | Moon Gold |
-| `--primary-foreground` | Void |
-| `--secondary` | Obsidian |
-| `--secondary-foreground` | Mist |
-| `--muted` | Carbon |
-| `--muted-foreground` | Ash |
-| `--accent` | Obsidian |
-| `--accent-foreground` | Paper |
-| `--destructive` | Coral |
-| `--border` | Graphite |
-| `--input` | Smoke |
-| `--ring` | Moon Gold |
+| `--background` | `color/bg` |
+| `--foreground` | `color/text/primary` |
+| `--card` · `--popover` | `color/surface` |
+| `--card-foreground` · `--popover-foreground` | `color/text/primary` |
+| `--primary` | `color/accent` |
+| `--primary-foreground` | `color/text/on-accent` |
+| `--secondary` | `color/surface-sub` |
+| `--secondary-foreground` | `color/text/secondary` |
+| `--muted` | `color/surface` |
+| `--muted-foreground` | `color/text/tertiary` |
+| `--accent` | `color/accent-soft` |
+| `--accent-foreground` | `color/accent-strong` |
+| `--destructive` | `color/danger` |
+| `--border` · `--input` | `color/border` |
+| `--ring` | `color/accent` |
 
 ---
 
 ## 3. 글씨 (Typography)
 
-### 서체
+서체는 **Noto Sans KR** 하나. 모든 스타일 자간 **-2%**. (Figma 글자 스타일 `Taro/…`)
 
-| 역할 | 서체 | 대체 |
-|---|---|---|
-| 기본 (UI · 본문 · 제목) | **Pretendard Variable** | `system-ui`, `Apple SD Gothic Neo`, `Noto Sans KR` |
-| 카드 이름 (선택) | **Noto Serif KR** 500 | `serif` |
-| 숫자 · 로마 숫자 (XIX 등) | Pretendard, `font-variant-numeric: tabular-nums` | — |
+| 스타일 | 굵기 | 크기 / 줄 높이 | 쓰는 곳 |
+|---|---|---|---|
+| `Taro/Display` | Bold | 28 / 38 | 시작 화면 제목 |
+| `Taro/Title` | Bold | 22 / 32 | 화면 질문 ("어떤 주제가 궁금한가요?", 결과 상단 이름) |
+| `Taro/Headline` | Bold | 18 / 26 | 카드 이름 · 앱 바 제목 |
+| `Taro/Body` | Regular | 16 / 26 | **해석 본문** (가운데 정렬, 3줄) |
+| `Taro/Body Bold` | Bold | 16 / 24 | L 버튼 글자 |
+| `Taro/Label` | Medium | 15 / 22 | M 버튼 · 칩 · 토스트 |
+| `Taro/Caption` | Regular | 13 / 19 | 안내 · 보조 · 오락용 문구 |
+| `Taro/Caption Bold` | Bold | 13 / 19 | 입력 라벨 |
 
-- Inter는 한글 글리프가 없어 쓰지 않는다.
-- 카드 이름에만 명조 계열을 쓰면 타로다운 분위기가 나온다. 다른 곳에는 쓰지 않는다.
-
-### 크기 (모바일 기준)
-
-| 역할 | 크기 | 굵기 | 줄 높이 | 자간 | 토큰 | 쓰는 곳 |
-|---|---|---|---|---|---|---|
-| display | 32px | 600 | 1.25 | -0.02em | `--text-display` | 시작 화면 제목 |
-| title | 24px | 600 | 1.3 | -0.015em | `--text-title` | 화면 제목 · 결과 상단 "지민님의 타로" |
-| card-name | 22px | 500 (serif) | 1.3 | 0 | `--text-card-name` | 카드 이름 |
-| body-lg | 18px | 500 | 1.6 | -0.01em | `--text-body-lg` | **해석 3줄** |
-| body | 16px | 400 | 1.6 | -0.01em | `--text-body` | 본문 · 입력 값 |
-| label | 14px | 500 | 1.4 | -0.005em | `--text-label` | 입력 라벨 · 버튼 글자 |
-| caption | 13px | 400 | 1.5 | 0 | `--text-caption` | 개인정보 안내 · 오락용 안내 |
-
-### 규칙
-
-- **입력창 글자는 16px 이상.** 그보다 작으면 iOS에서 입력할 때 화면이 확대된다.
-- 굵기는 **400 · 500 · 600**만 쓴다. 700 이상 금지.
-- 한글은 줄 높이 1.5~1.6을 지키고, `word-break: keep-all`로 단어 중간에서 끊기지 않게 한다. `text-wrap: balance`를 제목에 쓴다.
-- 영문 대문자 변환(uppercase) · 넓은 자간 금지.
-- 해석 문장은 `text-body-lg` + Paper 색. 한 줄에 한 문장.
+규칙
+- 굵기는 Regular · Medium · Bold만 쓴다 (Noto Sans KR에 SemiBold 없음).
+- 입력창 글자는 **16px 이상**(Body). 그보다 작으면 iOS에서 입력 때 화면이 확대된다.
+- `word-break: keep-all`로 단어 중간에서 줄이 끊기지 않게 한다. 제목에는 `text-wrap: balance`.
+- 영문 대문자 변환 · 넓은 자간 금지.
 
 ---
 
-## 4. 간격 · 모양 (Spacing & Shapes)
+## 4. 간격 · 모양
 
-**기준 단위:** 4px · **밀도:** 여유 있음 (모바일 터치 우선)
+**기준 단위:** 4px
 
 ### 간격
 
-| 이름 | 값 | 쓰는 곳 |
+| 값 | 쓰는 곳 |
+|---|---|
+| 4 | 아이콘 미세 간격 |
+| 6 | 버튼 아이콘과 라벨 사이 |
+| 8 | 칩 사이 · 입력 라벨과 입력창 · 버튼 사이 |
+| 10 | 개인정보 안내 아이콘과 글자 사이 |
+| 12 | 하단 고정 버튼 영역 위쪽 여백 |
+| 16 | 입력 항목 사이 · 결과 카드 안 간격 |
+| 20 | **화면 좌우 여백** |
+| 24 | 시작 화면 요소 사이 · 결과 카드 좌우 안쪽 여백 |
+| 44 | 화면 맨 위 (상태 표시줄 영역) |
+
+- 간격은 `flex` + `gap-*`으로. `space-x-*` · `space-y-*` 금지 (shadcn 규칙).
+- 너비와 높이가 같으면 `size-*`.
+- 하단 버튼 영역: `padding-bottom: max(34px, env(safe-area-inset-bottom))`.
+
+### 모서리 반경 (팩 그대로)
+
+| 요소 | 값 | 변수 |
 |---|---|---|
-| `gap-1` | 4px | 아이콘과 글자 사이 |
-| `gap-2` | 8px | 칩 사이 · 버튼 사이 |
-| `gap-3` | 12px | 라벨과 입력창 |
-| `gap-4` | 16px | 입력 항목 사이 · 카드 안 간격 |
-| `gap-6` | 24px | 섹션 사이 · 카드 안쪽 여백 |
-| `gap-8` | 32px | 화면 큰 덩어리 사이 |
-| `gap-12` | 48px | 시작 화면 위아래 여백 |
-
-- 화면 좌우 여백 **20px**. 아래 버튼 영역은 `padding-bottom: max(20px, env(safe-area-inset-bottom))`로 홈 바를 피한다.
-- 간격은 `flex` + `gap-*`으로 만든다. `space-x-*` · `space-y-*` 금지 (shadcn 규칙).
-- 너비와 높이가 같으면 `size-*`를 쓴다 (`size-11`).
-
-### 모서리 반경
-
-| 요소 | 값 | 토큰 |
-|---|---|---|
-| 입력창 · 버튼 | 10px | `--radius-md` |
-| 칩 (주제 선택) | 10px | `--radius-md` |
-| 카드 컨테이너 · 결과 카드 | 16px | `--radius-xl` |
-| **타로 카드 그림** | 12px | `--radius-card` |
-| 배지 · 작은 태그 | 6px | `--radius-sm` |
-| 알약 (토스트) | 9999px | `--radius-full` |
-
-- 반경 어휘는 이 다섯 가지만. 임의 값(`rounded-[13px]`) 금지.
+| 화면 틀(디자인 파일용) | 32 | `radius/screen` |
+| 결과 카드 | 24 | `radius/xl` |
+| 칩 (알약) | 22 | `radius/pill` |
+| L 버튼 | 16 | `radius/lg` |
+| M 버튼 | 14 | `radius/md` |
+| 입력창 · 개인정보 안내 · 토스트 · 카드 뒷면 | 12 | `radius/sm` |
+| 카드 앞면(그림) | 10 | `radius/card` |
 
 ### 그림자 · 입체감
 
-- 면 구분은 **면 색 단계 + 1px 테두리**로 한다. 큰 그림자 금지.
-- 허용 그림자는 둘뿐이다.
-  - 결과 카드 은은한 후광: `0 0 40px -8px rgba(240, 199, 106, 0.18)` (금빛이 아주 옅게 번짐. 결과 카드 한 곳에만)
-  - 팝업 · 토스트: `0 4px 24px rgba(0, 0, 0, 0.5)`
+- 면 구분은 **면 색 단계 + 1px 테두리**로 한다.
+- 카드 앞면(그림)만 그림자: `0 6px 16px rgba(0,0,0,0.12)` — 팩 값이며 다크에서는 약해 보이니 구현 때 `0.4`로 올려 쓴다. 선택된 카드는 `0 10px 28px`.
+- 토스트 · 팝업은 그림자 없이 `inverse` 면의 대비로 구분한다.
 
 ### 면의 위계
 
-| 단계 | 이름 | 값 | 용도 |
-|---|---|---|---|
-| 0 | Void | `#0a0a14` | 화면 바탕 |
-| 1 | Carbon | `#12121f` | 입력창 · 결과 카드 |
-| 2 | Obsidian | `#1a1a2b` | 선택된 칩 · 팝업 · 눌렀을 때 |
+| 단계 | 토큰 | 용도 |
+|---|---|---|
+| 0 | `color/bg` | 화면 바탕 |
+| 1 | `color/surface` | 결과 카드 · 입력창 · 칩 |
+| 2 | `color/surface-sub` | 개인정보 안내 · 눌렀을 때 |
 
 ---
 
-## 5. 컴포넌트 규칙
+## 5. 컴포넌트 규칙 (크기는 팩 그대로)
 
-shadcn/ui 컴포넌트를 먼저 쓰고, 없을 때만 직접 만든다. 색은 의미 이름(`bg-primary`, `text-muted-foreground`)만 쓴다.
+shadcn/ui 컴포넌트를 먼저 쓰고, 없을 때만 직접 만든다. 색은 의미 이름(`bg-primary` 등)만 쓴다.
 
-### 5-1. 버튼 (Button)
+### 5-1. 아이콘
 
-| 변형 | 모양 | 쓰는 곳 | 한 화면 수 |
+20×20 · 선 두께 1.8 · 둥근 끝. 색은 붙는 글자 색을 따른다.
+
+`chevron-left`(뒤로) · `download`(이미지 저장) · `share`(결과 공유) · `refresh`(다시 뽑기) · `home`(처음으로) · `lock`(개인정보) · `copy`(복사)
+
+- 이모지 아이콘은 쓰지 않는다 (팩: 구현 시 SVG로 교체).
+- 버튼 안 아이콘은 `data-icon="inline-start"`, 아이콘에 크기 클래스를 주지 않는다 (shadcn).
+
+### 5-2. 버튼 (Button)
+
+| 변형 | 크기 | 모양 | 글자 |
 |---|---|---|---|
-| **primary** | 배경 Gold · 글자 Void · 높이 52px · 가로 가득 · 반경 10px · 14~16px / 600 | [타로 시작] · [카드 한 장 뽑기] | 1개 |
-| **secondary** | 배경 Obsidian · 글자 Paper · 높이 48px | [이미지 저장] · [결과 공유] | 2개 |
-| **outline** | 투명 · 1px Smoke 테두리 · 글자 Mist · 높이 48px | [다시 뽑기] | 1개 |
-| **ghost** | 투명 · 글자 Fog · 높이 44px | [처음으로] · 뒤로 가기 | 자유 |
+| **Primary L** | 335×56 · 반경 16 | 바탕 `accent` | `Body Bold` · `on-accent` |
+| **Primary M** | 162×48 · 반경 14 | 바탕 `accent` | `Label` · `on-accent` |
+| **Secondary L / M** | 335×56 / 162×48 | 바탕 `surface` · 1px `border` | `Body Bold` / `Label` · `text/primary` |
+| **Disabled L / M** | 335×56 / 162×48 | 바탕 `disabled` | `text/tertiary` |
 
-- 상태: hover는 밝기 +6%, **pressed는 `scale-[0.98]`**, **focus-visible은 2px Gold 링 + 2px 간격**, disabled는 불투명도 40% + `cursor-not-allowed`.
-- **비활성 primary**는 [카드 한 장 뽑기] 조건 미충족 때 쓴다. 왜 비활성인지 알 수 있게 입력칸 안내를 같이 보여 준다.
-- 아이콘은 `data-icon="inline-start"`로 넣고, 아이콘에 크기 클래스를 주지 않는다.
-- 로딩 상태는 `Spinner` + `disabled`를 조합한다 (`isLoading` 속성 없음). 이미지 만드는 동안 [이미지 저장]에 쓴다.
-- 결과 화면 버튼 배치: 2×2 그리드, `gap-2`. 윗줄 [이미지 저장] [결과 공유] / 아랫줄 [다시 뽑기] [처음으로].
+- 아이콘 20px, 아이콘과 라벨 간격 6px. 가운데 정렬.
+- **화면당 Primary는 1개.** 결과 화면은 [결과 공유]만 Primary M, 나머지(이미지 저장 · 다시 뽑기 · 처음으로)는 Secondary M.
+- L은 화면당 주요 행동(타로 시작 · 카드 한 장 뽑기), M은 결과 화면 2×2 버튼.
+- Disabled: 이름 · 생년월일 · 주제 중 하나라도 비면. 이유가 보이게 입력칸 안내를 같이 둔다.
+- 눌림 `scale-[0.98]`, 포커스 `focus-visible` 2px `accent` 링 + 2px 간격.
+- 로딩은 `Spinner` + `disabled` 조합 (`isLoading` 없음).
 
-### 5-2. 입력 (Field · Input)
+### 5-3. 입력 (Field · Input)
 
-- `FieldGroup` + `Field` + `FieldLabel`로 만든다. `div` + `space-y-*` 금지.
-- 입력창: 높이 52px · 배경 Carbon · 1px Smoke 테두리 · 글자 Paper 16px · 자리 표시 글자 Ash · 반경 10px · 좌우 안쪽 여백 16px.
-- 포커스: 테두리 Gold + 2px Gold 링 (옅게 40%).
-- **오류**: `Field`에 `data-invalid`, 입력창에 `aria-invalid`. 테두리 Coral + 아래에 Coral 문구와 ⚠ 아이콘 ("날짜를 다시 확인해 주세요").
-- 이름: `maxLength=10`, 오른쪽에 `3/10` 글자 수 (caption · Ash).
-- 생년월일: 숫자 키패드(`inputmode="numeric"`), 연 · 월 · 일 3칸 또는 한 칸 자동 구분. 오류는 입력 확정(blur) 때 보여 준다.
-- 전공은 라벨 옆에 `선택` 배지를 붙인다 (Badge secondary).
+`FieldGroup` + `Field` + `FieldLabel`로 만든다.
 
-### 5-3. 주제 선택 (ToggleGroup)
+| 부분 | 값 |
+|---|---|
+| 라벨 | `Caption Bold` · `text/secondary` (예: "이름 (닉네임 OK)") |
+| 입력창 | 335×52 · 반경 12 · 바탕 `surface` · 1px `border` · 좌우 16 |
+| 라벨-입력창 간격 | 8 |
+| 값 글자 | `Body` — 입력 전 `text/tertiary`, 입력 후 `text/primary` |
+| 도움말 | `Caption` · `danger` (오류 때만) |
 
-주제 6개는 선택지 2~7개이므로 **`ToggleGroup`** (단일 선택)을 쓴다. 버튼을 반복해 직접 선택 상태를 만들지 않는다.
+상태
+- **Default**: 위 기본.
+- **Filled**: 값 `text/primary`.
+- **Focused**: 테두리 2px `accent`.
+- **Error**: 테두리 1.5px `danger` + 아래 `danger` 문구 "날짜를 다시 확인해 주세요". 오류는 `Field`에 `data-invalid`, 입력창에 `aria-invalid`.
 
-- 3열 × 2행 그리드, `gap-2`. 칩 높이 56px · 이모지(💼 💰 💕 🌿 📚 ✨) 위, 글자 아래 (또는 한 줄).
-- 기본: 배경 Carbon · 1px Smoke 테두리 · 글자 Mist.
-- 선택: 배경 Obsidian · **1px Gold 테두리** · 글자 Paper · 오른쪽 위 작은 ✓. (**색만으로 구분하지 않기 위해 ✓를 함께 둔다.**)
-- 이모지는 장식이다 (`aria-hidden`). 칩 글자가 이름이다.
+규칙: 이름 최대 10자 · 생년월일은 숫자 키패드(`inputmode="numeric"`)이고 실제 날짜만 허용 · 전공은 선택(라벨에 "선택" 표시) · 이름은 닉네임 권장(이미지 · 공유에 들어감).
 
-### 5-4. 카드 (Card)
+### 5-4. 주제 칩 (Topic Chip, `ToggleGroup`)
 
-`Card` · `CardHeader` · `CardTitle` · `CardContent` · `CardFooter`를 쓴다. 한 `CardContent`에 몰아넣지 않는다.
+선택지 2~7개이므로 `ToggleGroup`(단일 선택). 버튼을 반복해 선택 상태를 직접 만들지 않는다.
 
-| 종류 | 모양 | 쓰는 곳 |
-|---|---|---|
-| **기본 카드** | 배경 Carbon · 1px Graphite 테두리 · 반경 16px · 안쪽 여백 24px · 그림자 없음 | 입력 영역 묶음 |
-| **결과 카드** | 기본 카드 + 금빛 후광 · 안쪽 여백 24px · 폭 가득 | 저장 이미지가 되는 영역 |
+| 상태 | 모양 |
+|---|---|
+| Default | 105×44 · 반경 22(알약) · 바탕 `surface` · 1px `border` · `Label` `text/secondary` |
+| Selected | 바탕 `accent-soft` · **1.5px `accent` 테두리** · 글자 15 Bold `accent-strong` |
 
-결과 카드 안쪽 순서(위에서 아래로):
-1. `지민님의 타로 · 커리어` (title 24px, Paper) + 주제 배지
-2. 타로 카드 그림 (아래 5-5)
-3. `XIX 태양 · ♌ 사자자리` (카드 번호 Iris · 카드 이름 serif Paper · 별자리 Iris)
-4. 해석 3줄 (body-lg Paper, 줄 간격 12px)
-5. `※ 오락용 타로 해석입니다` (caption Fog)
+- 3열 × 2행, 간격 8. 글자만(이모지 없음).
+- 선택은 테두리 + 굵은 글자로 알린다 (색만으로 구분하지 않음).
 
-### 5-5. 타로 카드 그림 (TarotCard)
+### 5-5. 개인정보 안내 (Privacy Notice, `Alert`)
+
+- 335 폭 · 반경 12 · 바탕 `surface-sub` · 좌우 16 / 상하 14 · lock 아이콘 20 + `Caption`(12~13) `text/secondary` · 간격 10.
+- 입력 화면은 **입력칸 바로 아래**, 결과 화면은 버튼 아래. 같은 컴포넌트를 쓴다.
+- 문구(입력 화면): "입력한 이름 · 생년월일 · 전공은 해석을 만드는 데만 쓰고, 서버로 보내거나 저장하지 않아요. 창을 닫거나 [처음으로]를 누르면 바로 지워져요."
+- 불투명도를 낮추지 않는다.
+
+### 5-6. 토스트 (Toast)
+
+- 반경 12 · 바탕 `inverse`(밝은 면) · 좌우 20 / 상하 14 · `Label` `on-accent`(어두운 글자).
+- 저장 성공 "이미지를 저장했어요" · 복사 성공 "결과를 복사했어요. 원하는 앱에 붙여 넣어 주세요".
+- 프로젝트 base에 맞는 `toast` / `sonner`를 쓰고 직접 `z-index`를 주지 않는다. `role="status"`.
+
+### 5-7. 앱 바 (App Bar)
+
+- 375×56 · 좌우 16 · 간격 8. 왼쪽 뒤로(chevron-left 20) · 가운데 제목 `Headline` · 오른쪽 같은 크기 빈칸(제목을 가운데에 두기 위함).
+- 속성: Title(글자), Show Back(켜기/끄기).
+
+### 5-8. 타로 카드 (Tarot Card)
+
+**그림**: Rider-Waite-Smith(1909) 메이저 아르카나 22장. 파일: 78 Tarot Cards. 직접 만든 그림이 아니므로 출처를 화면 · 저장소에 남긴다.
 
 | 항목 | 값 |
 |---|---|
-| 비율 | **2 : 3** (예: 폭 200px · 높이 300px). 결과 카드 안에서 폭의 약 55% |
-| 모서리 | 12px |
-| 테두리 | 1px Gold (불투명도 60%) |
-| 뒷면 | Obsidian 바탕 + Gold 헤어라인 별 문양 (직접 만든 그림) |
-| 앞면 | 카드 그림 (출처가 분명한 그림만, PRD 리스크) |
+| 앞면 | 160×268 · 반경 10 · 그림이 꽉 차게(FILL) · 그림자 |
+| 뒷면 | 120×200 · 반경 12 · 바탕 `surface` · 2px `accent` 테두리 · 안쪽 8px 들여 1px `accent` 사각형(반경 8) · 가운데 64px 원(`accent-soft` + 1px `accent`) 안에 별 36 · 점 2개 |
+| 크기 변형 | 결과 카드 160×268, 공개 화면 208×348, 시작 화면 부채꼴 128×214 |
 
-**뒤집기 모션** (F-3)
-- `rotateY(0 → 180deg)`, 길이 **0.8초** (1초 이내 조건), `cubic-bezier(0.2, 0.8, 0.2, 1)`, `transform-style: preserve-3d`.
-- 뒤집는 동안 카드가 살짝 떠오른다 (`translateY(-8px)` → 0).
-- `prefers-reduced-motion: reduce`이면 뒤집기 없이 **0.2초 페이드**로 바꾼다.
-- 뒤집기가 끝나면 해석 3줄이 위에서 아래로 순서대로 나타난다 (줄마다 80ms 간격, 페이드 + `translateY(6px)`).
+**뒤집기 · 뽑기 모션** (F-3)
+- 카드 뒷면 22장을 부채꼴(반지름 430, 간격 8°)로 펼치고 좌우 스와이프로 넘긴다. 탭한 카드가 가운데로 올라오며(0.5초, 크기 1.7배) 뒤집힌다(rotateY 180° 0.6초). 앞면은 22장 중 무작위, 정방향.
+- 진입은 카드가 아래→위로 0.02초 간격(stagger). 결과 자리로 이동(FLIP 0.5초) 뒤 해석 줄이 0.08초 간격으로 나타난다.
+- `transform` · `opacity`만 애니메이션한다. `prefers-reduced-motion: reduce`이면 4배 빠르게(거의 즉시).
 
-### 5-6. 개인정보 안내 (PrivacyNote)
+### 5-9. 결과 카드 (Result Card)
 
-입력 화면 · 결과 화면 공통. 기능명세의 안내문을 그대로 쓴다.
+335 폭 · 반경 24 · 바탕 `surface` · 좌우 24 / 상하 28 · 간격 16 · 가운데 정렬. 이 영역이 그대로 저장 이미지가 된다.
 
-- `Alert` 컴포넌트로 만든다 (직접 만든 `div` 금지). 배경 Carbon · 1px Graphite 테두리 · 반경 10px · 안쪽 여백 12px 16px.
-- 🔒 아이콘 + caption 13px · 글자 Fog. 줄 높이 1.5.
-- 위치: 입력 화면은 **입력칸 바로 아래** (PRD 리스크 대응), 결과 화면은 버튼 아래.
-- 흐리게 만들지 않는다. 불투명도 낮추기 금지.
+위에서 아래로
+1. 제목 `지민님의 타로 · 커리어` (`Title`, `text/secondary`)
+2. 카드 앞면 160×268
+3. 메타 `XIX 태양 · 사자자리` (`Headline`, `accent-strong`)
+4. 해석 3줄 (`Body`, `text/primary`, 가운데, 줄 간격 2) — 줄1 카드×주제 기본 문장(이름 포함), 줄2 별자리, 줄3 전공 계열
+5. `※ 오락용 타로 해석입니다` (`Caption`, `text/tertiary`)
 
-### 5-7. 배지 (Badge)
+속성: Title · Meta · Line 1~3(글자), **Show Major Line**(켜기/끄기 — 전공 미입력 시 3줄째 끔).
 
-- 기본: 배경 `rgba(255,255,255,0.06)` · 글자 Fog · 반경 6px · 높이 22px · 12px / 500.
-- "선택" 표시 · 주제 표시에 쓴다. `span`에 색을 직접 입히지 않는다.
+### 5-10. 저장 이미지 (1080×1350 PNG)
 
-### 5-8. 안내 · 토스트
+결과 카드 영역 그대로. 이름 · 주제 · 카드 · 별자리 · 해석 3줄 · 오락용 안내 · 서비스 이름. **생년월일 · 전공 원문은 넣지 않는다.**
 
-| 상황 | 종류 | 아이콘 | 색 |
-|---|---|---|---|
-| 이미지 저장 성공 · 복사 성공 | 토스트 (알약, 아래 중앙, 2.5초) | ✓ | Mint |
-| 생년월일 오류 | 입력칸 아래 문구 | ⚠ | Coral |
-| 이미지 저장 안 됨 | 화면 안 이미지 표시 + `Alert` ("길게 눌러 저장해 주세요") | ⓘ | Fog |
-| 복사 실패 | 글 상자 표시 + `Alert` ("길게 눌러 복사해 주세요") | ⓘ | Fog |
+- 바탕 `bg`, 안전 여백 80, 간격 24. 카드 그림 폭 380(높이 약 637). 제목 48 · 메타 40 · 해석 36(줄 높이 1.5) · 오락용 28 · 서비스 이름 28. (Figma 파일의 저장 이미지 시안 기준)
+- 서체는 이미지를 만들기 전에 불러와 둔다. 못 불러오면 `system-ui`로 대체.
 
-- 토스트는 프로젝트가 쓰는 base에 맞는 `toast` / `sonner`를 쓴다. 직접 `z-index`를 주지 않는다.
-- 문구는 `TARO_04` 안내 문구표를 그대로 쓴다.
+### 5-11. 저장 · 공유 피드백 (F-5 · F-6)
 
-### 5-9. 이미지 만들기용 카드 (저장 · 공유 이미지, 1080×1350)
+| 상황 | 모양 |
+|---|---|
+| 저장 성공 | 토스트 "이미지를 저장했어요" |
+| 자동 복사 성공 | 토스트(2줄) |
+| 저장 안 됨 (인앱 브라우저) | 어두운 가림막(`inverse`를 쓰지 않고 `bg` 80%) 위 아래 시트: "이미지를 길게 눌러 저장해 주세요" + 이미지 160×200 + 버튼 |
+| 복사 실패 | 시트: "아래 글을 길게 눌러 복사해 주세요" + 메시지 글 상자 + 버튼 |
 
-저장 이미지는 화면 컴포넌트를 그대로 크게 그린 것이다. 따로 디자인하지 않는다.
+- 시트 바탕은 `surface`, 반경 24(위쪽), 좌우 20 / 위 24.
+- 공유 메시지 템플릿은 `TARO_04`와 같다. 생년월일 · 전공 원문 없음.
 
-- 크기 1080×1350 (4:5). 바탕 Void + 중앙에 은은한 금빛 방사형 빛(불투명도 8%, 한 번만).
-- 안전 여백 80px. 카드 그림 폭 440px (2:3 → 높이 660px).
-- 글자 크기는 화면의 약 3배로 쓴다: 제목 64px · 해석 40px(줄 높이 1.6) · 오락용 안내 28px.
-- 하단 중앙에 서비스 이름 "🔮 오늘의 타로" (28px · Ash).
-- 넣지 않는 것: **생년월일 · 전공 원문** (원칙 2).
-- 서체는 이미지를 만들기 전에 불러와 둔다 (Pretendard · Noto Serif KR). 불러오지 못하면 `system-ui`로 대체해 글자가 깨지지 않게 한다.
-
-### 5-10. 화면 구조
+### 5-12. 화면 구조
 
 | 화면 | 구성 |
 |---|---|
-| S-01 시작 | 세로 중앙 정렬 · 카드 뒷면(폭 160px) → 제목 display → 설명 body → [타로 시작] primary → 오락용 안내 caption |
-| S-02 내 정보 | 상단 바(← 제목) → `FieldGroup`(이름 · 생년월일 · 전공) → 주제 `ToggleGroup` → PrivacyNote → 하단 고정 [카드 한 장 뽑기] |
-| S-03 결과 | 결과 카드 → 버튼 2×2 → PrivacyNote |
+| S-01 시작 | 세로 가운데 · 제목 Display · 카드 뒷면(부채꼴) · 설명 `Body` `text/secondary` · [타로 시작] Primary L · 오락용 안내 `Caption` |
+| S-02 내 정보 | 앱 바 → `FieldGroup`(이름 · 생년월일 · 전공) → 주제 칩 → 개인정보 안내 → 하단 고정 [카드 한 장 뽑기] Primary L |
+| S-03 결과 | 앱 바 → 결과 카드 → 버튼 2×2 → 개인정보 안내 |
 
-- 하단 고정 버튼 영역: 배경 Void + 위쪽에 Void → 투명 그라데이션 24px(내용이 버튼 뒤로 살짝 사라지는 용도. 이 그라데이션 외에 그라데이션 금지).
-- 상단 바 높이 56px · 뒤로 가기는 ghost 아이콘 버튼 `size-11`.
-- 최대 폭 480px로 가운데 정렬. 그보다 넓은 화면은 양옆을 Void로 채운다.
+- 좌우 여백 20, 간격 16, 상단 44(상태 표시줄), 하단 고정 영역 위 12 · 아래 34.
+- 최대 폭 480으로 가운데. 그보다 넓으면 양옆을 `bg`로 채운다.
 
 ---
 
 ## 6. 모션
 
-| 이름 | 길이 | 곡선 | 쓰는 곳 |
-|---|---|---|---|
-| fast | 150ms | ease-out | 버튼 눌림 · 칩 선택 |
-| base | 200ms | ease-out | 화면 전환 페이드 · 토스트 등장 |
-| flip | 800ms | `cubic-bezier(0.2, 0.8, 0.2, 1)` | 카드 뒤집기 |
-| reveal | 줄당 80ms 지연 | ease-out | 해석 3줄 순서대로 등장 |
+| 이름 | 길이 | 쓰는 곳 |
+|---|---|---|
+| fast | 150ms | 버튼 눌림 · 칩 선택 |
+| base | 200ms | 화면 전환 페이드 · 토스트 등장 |
+| pick | 500ms | 선택한 카드가 가운데로 |
+| flip | 600ms | 카드 뒤집기 |
+| reveal | 줄당 80ms 지연 | 해석 3줄 순서대로 등장 |
 
-- `@keyframes`는 `@theme`의 `--animate-*`로 정의한다.
-- `prefers-reduced-motion: reduce`이면 뒤집기 · 이동 모션을 끄고 페이드만 쓴다.
-- 반짝이는 별 · 파티클 등 무한 반복 장식 모션은 쓰지 않는다 (집중과 배터리).
+`@keyframes`는 `@theme`의 `--animate-*`로 정의. `prefers-reduced-motion`이면 이동 · 회전을 끄고 페이드만. 무한 반복 장식 모션 금지.
 
 ---
 
 ## 7. 접근성
 
-- 모든 누르는 요소 **44×44px 이상**.
-- 포커스 링은 항상 보인다 (Gold 2px). 제거 금지.
-- 화면 읽기: 카드 그림에는 `alt="XIX 태양 카드"`처럼 카드 이름을 쓴다. 이모지는 `aria-hidden`.
-- 오류 · 성공은 색 + 아이콘 + 문구 세 가지로 알린다.
-- 토스트는 `role="status"`, 오류 문구는 `role="alert"`.
-- 본문 대비 4.5:1 이상 (2장 표 참고).
-- 확대 허용 (`user-scalable=no` 금지).
+- 누르는 요소 **44×44px 이상** (칩 높이 44, 버튼 48~56).
+- 포커스 링은 항상 보인다 (2px `accent`).
+- 카드 그림 `alt="XIX 태양 카드"`처럼 카드 이름.
+- 오류 · 성공은 색 + 문구(+ 아이콘). 토스트 `role="status"`, 오류 문구 `role="alert"`.
+- 본문 대비 4.5:1 이상 (2장 표). 확대 허용 (`user-scalable=no` 금지).
 
 ---
 
@@ -324,83 +337,67 @@ shadcn/ui 컴포넌트를 먼저 쓰고, 없을 때만 직접 만든다. 색은 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* 팔레트 */
-  --color-void: #0a0a14;
-  --color-carbon: #12121f;
-  --color-obsidian: #1a1a2b;
-  --color-graphite: #2a2a40;
-  --color-smoke: #3d3d57;
-  --color-ash: #8a8aa6;
-  --color-fog: #a3a3bd;
-  --color-mist: #d6d6e6;
-  --color-paper: #ffffff;
-  --color-gold: #f0c76a;
-  --color-iris: #a99cff;
-  --color-coral: #f27d7d;
-  --color-mint: #5ed08a;
+  /* 팩 토큰 이름 + 다크 값 */
+  --color-bg: #0a0a14;
+  --color-surface: #12121f;
+  --color-surface-sub: #1a1a2b;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a3a3bd;
+  --color-text-tertiary: #8a8aa6;
+  --color-on-accent: #0a0a14;
+  --color-border: #3d3d57;
+  --color-accent: #00d959;
+  --color-accent-soft: #0d2b1c;
+  --color-accent-strong: #00d959;
+  --color-disabled: #2a2a40;
+  --color-danger: #f27d7d;
+  --color-inverse: #f3f3f5;
+  --color-accent-illust: #00de00;
 
   /* shadcn 의미 이름 */
-  --color-background: var(--color-void);
-  --color-foreground: var(--color-paper);
-  --color-card: var(--color-carbon);
-  --color-card-foreground: var(--color-paper);
-  --color-popover: var(--color-carbon);
-  --color-popover-foreground: var(--color-paper);
-  --color-primary: var(--color-gold);
-  --color-primary-foreground: var(--color-void);
-  --color-secondary: var(--color-obsidian);
-  --color-secondary-foreground: var(--color-mist);
-  --color-muted: var(--color-carbon);
-  --color-muted-foreground: var(--color-ash);
-  --color-accent: var(--color-obsidian);
-  --color-accent-foreground: var(--color-paper);
-  --color-destructive: var(--color-coral);
-  --color-border: var(--color-graphite);
-  --color-input: var(--color-smoke);
-  --color-ring: var(--color-gold);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-text-primary);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: var(--color-on-accent);
+  --color-secondary: var(--color-surface-sub);
+  --color-secondary-foreground: var(--color-text-secondary);
+  --color-muted: var(--color-surface);
+  --color-muted-foreground: var(--color-text-tertiary);
+  --color-accent-foreground: var(--color-accent-strong);
+  --color-destructive: var(--color-danger);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-accent);
 
-  /* 서체 */
-  --font-sans: "Pretendard Variable", Pretendard, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --font-serif: "Noto Serif KR", serif;
-
-  /* 글자 크기 */
-  --text-display: 32px;
-  --text-display--line-height: 1.25;
-  --text-display--letter-spacing: -0.02em;
-  --text-title: 24px;
-  --text-title--line-height: 1.3;
-  --text-title--letter-spacing: -0.015em;
-  --text-card-name: 22px;
-  --text-card-name--line-height: 1.3;
-  --text-body-lg: 18px;
-  --text-body-lg--line-height: 1.6;
-  --text-body-lg--letter-spacing: -0.01em;
-  --text-body: 16px;
-  --text-body--line-height: 1.6;
-  --text-label: 14px;
-  --text-label--line-height: 1.4;
-  --text-caption: 13px;
-  --text-caption--line-height: 1.5;
+  /* 서체 · 글자 스타일 (자간 -2%) */
+  --font-sans: "Noto Sans KR", system-ui, "Apple SD Gothic Neo", sans-serif;
+  --tracking-taro: -0.02em;
+  --text-display: 28px;      --text-display--line-height: 38px;
+  --text-title: 22px;        --text-title--line-height: 32px;
+  --text-headline: 18px;     --text-headline--line-height: 26px;
+  --text-body: 16px;         --text-body--line-height: 26px;
+  --text-label: 15px;        --text-label--line-height: 22px;
+  --text-caption: 13px;      --text-caption--line-height: 19px;
 
   /* 반경 */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-xl: 16px;
-  --radius-card: 12px;
+  --radius-card: 10px;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-pill: 22px;
+  --radius-xl: 24px;
 
   /* 그림자 */
-  --shadow-glow: 0 0 40px -8px rgb(240 199 106 / 0.18);
-  --shadow-pop: 0 4px 24px rgb(0 0 0 / 0.5);
+  --shadow-card: 0 6px 16px rgb(0 0 0 / 0.4);
+  --shadow-card-picked: 0 10px 28px rgb(0 0 0 / 0.5);
 
   /* 모션 */
-  --ease-flip: cubic-bezier(0.2, 0.8, 0.2, 1);
   --animate-fade-in: fade-in 0.2s ease-out;
   --animate-reveal: reveal 0.3s ease-out both;
-
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes reveal {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -411,44 +408,45 @@ shadcn/ui 컴포넌트를 먼저 쓰고, 없을 때만 직접 만든다. 색은 
   html { color-scheme: dark; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
+    letter-spacing: var(--tracking-taro);
     word-break: keep-all;
   }
 }
 ```
 
-- 이 서비스는 어두운 테마 하나뿐이므로 `<html class="dark">`로 고정하고, 컴포넌트에서 `dark:` 색 덮어쓰기는 하지 않는다 (shadcn 규칙).
+`<html class="dark">`로 고정하고, 컴포넌트에서 `dark:` 색 덮어쓰기는 하지 않는다.
 
 ---
 
 ## 9. Do · Don't
 
 ### Do
-- 금색은 한 화면에 핵심 버튼 하나에만 쓴다.
-- 해석 문장은 Paper 색 + 18px + 줄 높이 1.6으로 크게 보여 준다.
-- 선택 상태는 테두리 색 + ✓ 아이콘으로 함께 알린다.
-- 개인정보 안내는 입력칸 바로 아래에 읽히는 대비(Fog 이상)로 둔다.
-- 간격은 `gap-*`, 정사각형은 `size-*`, 조건부 클래스는 `cn()`을 쓴다.
-- shadcn 컴포넌트(`Field`, `ToggleGroup`, `Card`, `Alert`, `Badge`, `Spinner`)를 먼저 쓴다.
-- 입력창 글자는 16px 이상.
+- 팩의 토큰 이름 · 글자 스타일 이름 · 컴포넌트 크기를 그대로 쓴다.
+- 강조색 채움은 한 화면에 Primary 버튼 하나.
+- 연두 위 글자는 어두운 글자(`on-accent`).
+- 해석은 `Body` + `text/primary` + 가운데 정렬 + 3줄.
+- 선택 상태는 테두리 + 굵은 글자로, 오류는 문구와 함께.
+- shadcn 컴포넌트(`Field`, `ToggleGroup`, `Alert`, `Badge`, `Spinner`)를 먼저 쓴다.
 
 ### Don't
-- 굵기 700 이상을 쓰지 않는다.
-- 금색을 보조 버튼 · 링크 · 장식 · 본문 글자에 쓰지 않는다.
-- Iris · Coral · Mint를 버튼 바탕이나 장식 채움에 쓰지 않는다 (글자 · 아이콘 · 작은 표시 전용).
-- 큰 그림자 · 네온 번짐 · 무지개 그라데이션을 쓰지 않는다 (결과 카드 후광과 하단 버튼 영역 그라데이션만 예외).
-- `rounded-[임의값]`, `bg-blue-500` 같은 원색 직접 지정 금지. 토큰만 쓴다.
-- 개인정보 안내를 불투명도 낮추거나 아주 작게 만들지 않는다.
-- 색만으로 상태를 알리지 않는다.
+- 흰 글자를 연두 바탕에 쓰지 않는다 (1.9:1).
+- 이전 금색 · 명조 서체 · 금빛 후광을 쓰지 않는다.
+- 팩에 없는 색 · 반경(`rounded-[13px]`) · 원색(`bg-blue-500`)을 임의로 쓰지 않는다.
+- 굵기 SemiBold 이하/ExtraBold 이상을 쓰지 않는다 (Regular · Medium · Bold만).
+- 개인정보 안내의 불투명도를 낮추거나 숨기지 않는다.
 - 저장 이미지 · 공유 글에 생년월일 · 전공 원문을 넣지 않는다.
-- 계속 반짝이는 장식 모션을 넣지 않는다.
+- 칩 · 아이콘에 이모지를 쓰지 않는다.
 
 ---
 
-## 10. 구현 전에 정할 것
+## 10. 남은 결정 · 확인 필요
 
 | 항목 | 상태 |
 |---|---|
-| 카드 그림 22장 출처 · 스타일 (직접 제작 또는 허가된 그림) | PRD 미정. 그림 스타일에 따라 Gold 테두리 · 후광 강도를 다시 맞춘다 |
-| Pretendard · Noto Serif KR 불러오기 방식 (자체 호스팅 권장 — 외부 CDN에 방문 기록이 가지 않게) | 미정 |
-| 카드 뒷면 문양 | 미정 |
-| 실제 기기(작은 화면 320px, 인앱 브라우저)에서 확인 | 구현 후 |
+| 다크 색 값 (`bg` ~ `inverse`) | 팩에 없는 값을 이 문서에서 정했다. 선배에게 다크 버전이 있는지 확인 |
+| 카드 그림 22장 중 Figma 파일에는 태양 카드만 올림 | 나머지 21장은 구현 시 연결 |
+| 카드 그림 출처 표기 위치 (화면 하단 · 설정 · 저장소 README) | 미정. Rider-Waite-Smith(1909) 공개 도메인 여부는 구현 전 재확인 |
+| 와이어프레임(`TARO_04`)의 이모지 칩 | 팩은 글자만. 와이어프레임 문서 갱신 여부 미정 |
+| 팩의 카드 고르기(스와이프) 화면 | 이 프로젝트 Figma 파일에는 아직 반영하지 않음 (기존 화면 유지) |
+| 폰트 불러오기 방식 (Noto Sans KR 자체 호스팅 권장) | 미정 |
+| 실제 기기(320px, 인앱 브라우저) 확인 | 구현 후 |
